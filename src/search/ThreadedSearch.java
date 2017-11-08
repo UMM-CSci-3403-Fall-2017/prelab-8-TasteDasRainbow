@@ -14,11 +14,11 @@ public class ThreadedSearch<T> implements Runnable {
   }
 
   private ThreadedSearch(T target, ArrayList<T> list, int begin, int end, Answer answer) {
-    this.target=target;
-    this.list=list;
-    this.begin=begin;
-    this.end=end;
-    this.answer=answer;
+    target=target;
+    list=list;
+    begin=begin;
+    end=end;
+    answer=answer;
   }
 
   /**
@@ -46,12 +46,43 @@ public class ThreadedSearch<T> implements Runnable {
     * instance of this class as its `Runnable`. Then start each of those
     * threads, wait for them to all terminate, and then return the answer
     * in the shared `Answer` instance.
-    */
+    * */
+      ArrayList<Answer> answers = new ArrayList<Answer>();
+      Thread[] threads = new Thread[numThreads];
+      int division = list.size()/numThreads;
+      begin = 0;
+      end = division;
+
+      for( int i = 0; i < numThreads; i++){
+         threads[i] = new Thread(new ThreadedSearch<T>(target,list,begin,end,answers.get(i)));
+         threads[i].start();
+	 begin+= division;
+	 end+= division;
+       }
+
+      for( int k = 0; k < numThreads; k++){
+ 	threads[k].join();
+       }
+
+      for(int x = 0; x < answers.size(); x++){
+      if(answers.get(x).answer){
+         return true;
+      }
+     }      
     return false;
   }
 
   public void run() {
+    searchThread(target,list,begin,end);
+  }
 
+  private void searchThread(T target, ArrayList<T> list, int start, int end){
+   for(int j = start; j < end; j++ ){
+      if(list.get(j).equals(target)){
+         answer.answer = true;
+      
+   }
+  }
   }
 
   private class Answer {
